@@ -1,0 +1,242 @@
+# requirements.txt
+strands-agents>=0.1.0
+boto3>=1.26.0
+javalang>=0.13.0
+networkx>=2.8.0
+matplotlib>=3.5.0
+pathlib2>=2.3.7
+
+# requirements-dev.txt
+black>=22.0.0
+pytest>=7.0.0
+mypy>=0.950
+
+# setup.py
+from setuptools import setup, find_packages
+
+setup(
+    name="codebase-analysis-agent",
+    version="0.1.0",
+    description="AI Agent for analyzing large legacy codebases using AWS Strands",
+    packages=find_packages(),
+    install_requires=[
+        "strands-agents>=0.1.0",
+        "boto3>=1.26.0",
+        "javalang>=0.13.0",
+        "networkx>=2.8.0",
+        "matplotlib>=3.5.0",
+        "pathlib2>=2.3.7",
+    ],
+    python_requires=">=3.8",
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Intended Audience :: Developers",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+    ],
+)
+
+# .env.template
+# Copy this to .env and fill in your values
+
+# AWS Configuration
+AWS_REGION=us-west-2
+AWS_ACCESS_KEY_ID=your_access_key_here
+AWS_SECRET_ACCESS_KEY=your_secret_key_here
+
+# Bedrock Configuration
+BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20241022-v2:0
+
+# Optional: S3 bucket for storing analysis results
+S3_BUCKET_NAME=your-codebase-analysis-bucket
+
+# Optional: Knowledge Base ID if using Bedrock Knowledge Bases
+KNOWLEDGE_BASE_ID=your_knowledge_base_id
+
+# README.md
+
+# Codebase Analysis Agent
+
+An AI-powered agent built with AWS Strands for analyzing large legacy codebases, extracting business logic, and supporting modernization efforts.
+
+## Features
+
+- **Multi-language Analysis**: Java, JavaScript, Perl, Angular
+- **Framework Detection**: Struts, Spring, Spring Boot patterns
+- **Business Logic Extraction**: Separates business rules from infrastructure code
+- **Data Flow Mapping**: Visualizes how data moves through your system
+- **Knowledge Graph Generation**: Creates relationships between code entities
+- **Migration Documentation**: Risk-assessed documentation for modernization
+- **Semantic Search**: Find business logic using natural language queries
+
+## Quick Start
+
+### Prerequisites
+
+- Python 3.8+
+- AWS CLI configured with appropriate permissions
+- Access to Amazon Bedrock (Claude 3.5 Sonnet)
+- Local checkout of your codebase(s)
+
+### Installation
+
+```bash
+# Clone or download the agent code
+git clone <your-repo>
+cd codebase-analysis-agent
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Copy and configure environment
+cp .env.template .env
+# Edit .env with your AWS credentials and settings
+```
+
+### AWS Permissions
+
+Your AWS credentials need the following permissions:
+
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "bedrock:InvokeModel",
+                "bedrock:InvokeModelWithResponseStream"
+            ],
+            "Resource": "arn:aws:bedrock:*:*:model/anthropic.claude-3-5-sonnet-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::your-bucket/*",
+                "arn:aws:s3:::your-bucket"
+            ]
+        }
+    ]
+}
+```
+
+### Usage
+
+```bash
+python codebase_agent.py
+```
+
+Follow the prompts to:
+1. Enter your codebase path
+2. Ask questions about your code
+3. Generate documentation and analysis
+
+## Example Queries
+
+### Codebase Structure Analysis
+```
+"Analyze the overall structure of this codebase and identify the main architectural patterns"
+```
+
+### Business Logic Extraction
+```
+"Extract all Struts Action classes and document their business logic"
+```
+
+### Data Flow Analysis
+```
+"Build a data flow map showing how user registration data moves through the system"
+```
+
+### Search and Discovery
+```
+"Find all business logic related to payment processing and fee calculation"
+```
+
+### Migration Planning
+```
+"Create migration documentation for all high-risk Struts components"
+```
+
+## Architecture
+
+The agent uses several specialized tools:
+
+- **analyze_codebase_structure**: Gets overall architecture and framework usage
+- **extract_business_logic**: Finds and categorizes business logic entities  
+- **build_data_flow_map**: Maps data movement through system layers
+- **generate_knowledge_graph**: Creates relationship graphs between entities
+- **create_migration_documentation**: Generates migration-ready documentation
+- **search_business_logic**: Semantic search across business logic
+
+## Output Artifacts
+
+The agent generates several types of documentation:
+
+1. **Business Logic Inventory** (`business_entities.json`)
+2. **Knowledge Graph** (`knowledge_graph.json`) 
+3. **Data Flow Maps** (`data_flow.json`)
+4. **Migration Documentation** (`migration_plan.md`)
+5. **Risk Assessments** (embedded in documentation)
+
+## Extending the Agent
+
+### Adding New Language Support
+
+1. Create a parser for your language in the `CodebaseAnalyzer` class
+2. Add file detection patterns
+3. Implement business logic extraction patterns
+
+### Adding Custom Tools
+
+```python
+@tool
+def your_custom_analysis(repo_path: str, params: Dict) -> Dict:
+    """Your custom analysis logic"""
+    # Implementation here
+    return results
+
+# Add to agent tools list
+agent = Agent(
+    client=bedrock_client,
+    tools=[..., your_custom_analysis]
+)
+```
+
+### Integration with CI/CD
+
+The agent can be integrated into your CI/CD pipeline to:
+- Track business logic changes over time
+- Validate that migrations preserve business logic
+- Generate updated documentation on code changes
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Java parsing errors**: Ensure `javalang` can parse your Java version
+2. **AWS permissions**: Verify Bedrock access in your region
+3. **Large codebases**: Consider processing in chunks for very large repos (500k+ LOC)
+
+### Performance Optimization
+
+- Use incremental analysis for large repos
+- Cache AST parsing results
+- Process files in parallel for initial analysis
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+## License
+
+Apache 2.0 - See LICENSE file for details
